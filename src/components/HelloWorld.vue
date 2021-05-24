@@ -18,7 +18,23 @@
         <p class="subheading font-weight-regular">
           Project is still in progress, find us on our <a href="https://github.com/Inkweto/front">github</a> to see more!
         </p>
+
+        <v-btn
+          v-on:click='fetchDemoData'
+          target="_blank"
+          text
+        >
+          get some data from back-end
+        </v-btn>
+        <hr>
+          <p>
+              <i>{{result}}</i>
+          </p>
+        <hr>
+
       </v-col>
+
+
     </v-row>
   </v-container>
 </template>
@@ -26,8 +42,18 @@
 <script>
   export default {
     name: 'HelloWorld',
-
+    methods: {
+      async fetchDemoData() {
+        this.result = await fetch("http://localhost:5000/logs-search/?limit=1", {
+          headers: {
+            Accept: "application/json"
+          }
+        });
+        this.result = await this.result.json();
+      }
+    },
     data: () => ({
+      result: "",
       ecosystem: [
         {
           text: 'vuetify-loader',

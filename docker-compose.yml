@@ -1,13 +1,19 @@
 version: "3.9"
 services: 
   app:
-    container_name: log-search-front
-    image: node:12.18.1-alpine
+    build:
+      context: .
+      args:
+        USER_UID: $DEV_UID
+        USER_GID: $DEV_GID
+    user: ${DEV_UID}:${DEV_GID}
     tty: true
     env_file:
       - .env
     ports: 
-      - 8000:8080
-    working_dir: /app
+      - 8080:8080
     volumes:
       - ./:/app 
+      - excluded:/app/node_modules
+volumes:
+  excluded:

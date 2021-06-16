@@ -32,6 +32,9 @@
     <v-main>
       <HelloWorld/>
     </v-main>
+    <v-footer app color="dark" dark>    
+      <v-icon class="mr-1">mdi-copyright</v-icon>  2021 Inkweto
+    </v-footer>
   </v-app>
 </template>
 

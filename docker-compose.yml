@@ -11,7 +11,7 @@ services:
     env_file:
       - .env
     ports: 
-      - 8080:8080
+      - 7654:8080
     volumes:
       - ./:/app 
       - excluded:/app/node_modules

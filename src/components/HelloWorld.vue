@@ -1,109 +1,107 @@
 <template>
   <v-container>
-    <v-row class="text-center">
-      <v-col cols="12">
-        <v-img
-          :src="require('../assets/logo.png')"
-          class="my-3"
-          contain
-          height="200"
-        />
-      </v-col>
+    <v-col cols="12" class="text-center">
+      
 
-      <v-col class="mb-4">
-        <h1 class="display-2 font-weight-bold mb-3">
-          Welcome to LogSearch!
-        </h1>
+      <v-row class="mt-8">
+        <v-card width="25%">
+ 
+          <v-card-text>
+              <v-form>
+                  <v-text-field prepend-icon="mdi-magnify" label="Search phrase" v-model="searchPhrase"></v-text-field>
+                  <v-text-field prepend-icon="mdi-numeric" label="Maximun number of results" v-model="resultLimit"></v-text-field>
+              </v-form>
+          </v-card-text>
+          <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn test class="grey mx-0 mt-3" v-on:click='startSearching'>Search</v-btn>
+              <v-spacer></v-spacer>
+          </v-card-actions>
+        </v-card>
+        <v-spacer></v-spacer>
+        <v-card width="75%">
+          <v-card-title>
+              <v-spacer></v-spacer>
+              <v-text-field
+                  v-model="search"
+                  append-icon="mdi-magnify"
+                  label="Search"
+                  single-line
+                  hide-details
+              >
+              </v-text-field>
+          </v-card-title>
+          <v-data-table
+          :headers="headers"
+          :items="searchResults"
+          :items-per-page="10"
+          :search="search"
+          class="elevation-1"
+          >
+          </v-data-table>
+        </v-card>
+      </v-row>
 
-        <p class="subheading font-weight-regular">
-          Project is still in progress, find us on our <a href="https://github.com/Inkweto/front">github</a> to see more!
-        </p>
-
-        <v-btn
-          v-on:click='fetchDemoData'
-          target="_blank"
-          text
-        >
-          get some data from back-end
-        </v-btn>
-        <hr>
-          <p>
-              <i>{{result}}</i>
-          </p>
-        <hr>
-
-      </v-col>
-
-
-    </v-row>
+    </v-col>
   </v-container>
 </template>
 
 <script>
+  import Vue from 'vue'
+
   export default {
     name: 'HelloWorld',
     methods: {
-      async fetchDemoData() {
-        this.result = await fetch("http://localhost:5000/logs-search/?limit=1", {
-          headers: {
+      async startSearching() {
+        this.result = await fetch(Vue.prototype.$api_url + "/logs-search/?" +
+                                    "contains=" + this.searchPhrase +
+                                    "limit=" + this.resultLimit, {
+        method: 'POST',
+        headers: {
             Accept: "application/json"
-          }
+        }
         });
-        this.result = await this.result.json();
+        this.response = await this.result.json()
+        this.resultId = this.response.result_id
+        this.created();
+      },
+      async sth() {
+        this.result = await fetch(Vue.prototype.$api_url + "/result/?" +
+                                    "id=" + this.resultId, {
+        method: 'GET',
+        headers: {
+            Accept: "application/json"
+        }
+        });
+        this.response = await this.result.json()
+
+        if(this.response.msg != "no results yet") {
+          this.stopWaitingForResults();
+          this.searchResults = this.response
+        }
+
+      },
+      created() {
+        this.interval = setInterval(() => this.sth(), this.timeBetweenChecks);
+      },
+      stopWaitingForResults() {
+        clearInterval(this.interval);
       }
     },
+    
     data: () => ({
       result: "",
-      ecosystem: [
-        {
-          text: 'vuetify-loader',
-          href: 'https://github.com/vuetifyjs/vuetify-loader',
-        },
-        {
-          text: 'github',
-          href: 'https://github.com/vuetifyjs/vuetify',
-        },
-        {
-          text: 'awesome-vuetify',
-          href: 'https://github.com/vuetifyjs/awesome-vuetify',
-        },
+      response: [],
+      searchPhrase: '',
+      resultLimit: '',
+      resultId: '',
+      search: '',
+      headers: [
+        { text: 'Search Results', align: 'start', sortable: false, value: 'msg'}
       ],
-      importantLinks: [
-        {
-          text: 'Documentation',
-          href: 'https://vuetifyjs.com',
-        },
-        {
-          text: 'Chat',
-          href: 'https://community.vuetifyjs.com',
-        },
-        {
-          text: 'Made with Vuetify',
-          href: 'https://madewithvuejs.com/vuetify',
-        },
-        {
-          text: 'Twitter',
-          href: 'https://twitter.com/vuetifyjs',
-        },
-        {
-          text: 'Articles',
-          href: 'https://medium.com/vuetify',
-        },
-      ],
-      whatsNext: [
-        {
-          text: 'Explore components',
-          href: 'https://vuetifyjs.com/components/api-explorer',
-        },
-        {
-          text: 'Select a layout',
-          href: 'https://vuetifyjs.com/getting-started/pre-made-layouts',
-        },
-        {
-          text: 'Frequently Asked Questions',
-          href: 'https://vuetifyjs.com/getting-started/frequently-asked-questions',
-        },
-      ],
+      searchResults: [],
+      timeBetweenChecks: 1500,
+      interval: null,
     }),
   }
 </script>
